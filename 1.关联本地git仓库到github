@@ -1,0 +1,148 @@
+1.关联本地git仓库到github
+$ git remote add origin git@github.com:michaelliao/learngit.git
+
+2.把本地库的所有内容推送到远程库上
+git push -u origin master
+（注意：第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来, 以后可省略-u）
+
+3.git clone从远端克隆一个仓库到本地，但只能看到本地的master分支
+$ git clone git@github.com:jiyeershi/learnGit.git
+
+抓取分支：创建远程origin的dev分支到本地
+$ git checkout -b dev origin/dev
+
+建立本地分支和远程分支的关联，使用
+git branch --set-upstream branch-name origin/branch-name
+
+4.HEAD: 指向的就是当前分支
+
+5.创建dev分支，然后切换到dev分支
+$ git checkout -b dev
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令
+$ git branch dev
+$ git checkout dev
+
+创建分支：
+git branch <name>
+
+6.删除dev分支了，本地
+$ git branch -d dev
+
+切换分支：
+git checkout <name>
+
+合并某分支到当前分支：
+git merge <name>
+
+删除远端分支，冒号前面的空格不能少，原理是把一个空分支push到server上，相当于删除该分支
+git push origin :branch-name
+
+6.查看本地当前分支
+git branch
+
+7.查看所有分支，包含远端分支
+$ git branch -a
+
+存储修改(stage)
+git add filename
+
+可以把暂存区的修改撤销掉（unstage）
+git reset HEAD file
+
+在切换分支之前，把当前工作现场“储藏”起来
+$ git stash
+
+查看所有储存的工作现场
+$ git stash list
+
+从储存的现场恢复，有以下两种方式
+git stash apply ：但是恢复后，stash内容并不删除，需要用git stash drop来删除
+另一种方式是用git stash pop，恢复的同时把stash内容也删了
+
+要丢弃一个没有被合并过的分支，通过git branch -D <name>强行删除
+git branch -D <name>
+
+查看远程库的信息
+git remote
+显示更详细的信息
+git remote -v
+
+查看提交日志信息
+$ git log
+以下这个带参数的为日志图形化表示
+$ git log --graph --pretty=oneline --abbrev-commit（）
+
+
+回滚到add之前的状态,Git允许我们在版本的历史之间穿梭，使用命令
+git reset --hard commit_id
+
+git log可以查看提交历史，以便确定要回退到哪个版本。
+
+要重返未来，用git reflog查看命令历史，以便确定要回到未来的哪个版本。
+
+Git提供了一个命令git reflog用来记录你的每一次命令
+
+
+submodule:
+
+1.加模块并提交：
+为project1添加submodule ： 将~/submd/repos/lib1.git 添加为 libs/lib1
+project1 git:(master) git submodule add ~/submd/repos/lib1.git libs/lib1
+git commit -a -m "submodules[lib1] to project1"
+git push
+
+2.克隆工程，并且更新子模块：
+git clone ../repos/project1.git project1-b  克隆到project1-b，不含子模块
+
+/submd/ws  cd project1-b
+? henryyan@hy-hp  ~/submd/ws/project1-b git:(master) git submodule
+-c22aff85be91eca442734dcb07115ffe526b13a1 libs/lib1
+-7290dce0062bd77df1d83b27dd3fa3f25a836b54 libs/lib2
+看到submodules的状态是hash码和文件目录，但是注意前面有一个减号：-，含义是该子模块还没有检出。
+
+OK，检出project1-b的submodules……
+git submodule init
+git submodule update
+
+3.开发人员B的项目上修改Submodule的内容：
+project1-b在clone的时候获取到了submodule的commit id，然后当执行git submodule update的时候git就根据gitlink获取submodule的commit id，最后获取submodule的文件，所以clone之后不在任何分支上；但是master分支的commit id和HEAD保持一致。
+
+现在我们要修改lib1的文件需要先切换到master分支
+ ~/submd/ws/project1-b/libs/lib1  git checkout master
+~/submd/ws/project1-b/libs/lib1 git:(master) echo "add by developer B" >> lib1-features
+~/submd/ws/project1-b/libs/lib1 git:(master) git commit -a -m "update lib1-features by developer B"
+ ~/submd/ws/project1-b/libs/lib1 git:(master) git push
+
+在主项目中修改Submodule提交到仓库稍微繁琐一点
+~/submd/ws/project1-b/libs/lib1 git:(master) cd ~/submd/ws/project1-b
+~/submd/ws/project1-b git:(master) ? git add -u
+~/submd/ws/project1-b git:(master) ? git commit -m "update libs/lib1 to lastest commit id"
+~/submd/ws/project1-b git:(master) git push
+OK，大功高成，我们完成了Submodule的修改并把libs/lib1的最新commit id提交到了仓库
+
+新进员工加入团队，一次性Clone项目和Submodules
+一般人使用的时候都是使用如下命令：
+git clone /path/to/repos/foo.git
+git submodule init
+git submodule update
+或者：
+git clone --recursive /path/to/repos/foo.git
+
+
+
+git提交操作步骤：
+git add project-infos.txt
+git commit -m "init project1"
+git push origin master
+
+
+//常用命令
+mkdir foldname 创建文件夹  如：mkdir -p submd/repos
+touch foldname/filename 在文件夹下创建文件
+echo "project1" > project-infos.txt   输入文字到该文件中
+
+在命令模式中，连按两次大写字母Z，若当前编辑的文件曾被修改过，则Vi保存该文件后退出，返回到shell；若当前编辑的文件没被修改过，则Vi直接退出, 返回到shell。
+:q 系统退出Vi返回到shell
+:q! 若用户就是不想保存被修改后的文件而要强行退出Vi时，可使用命令
+:wq Vi将先保存文件，然后退出Vi返回到shell。
+　　
